@@ -1,0 +1,22 @@
+# 应用名称
+spring:
+  application:
+    name: ware
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://101.43.0.164:10910/gulimall_wms
+      username: root
+      password: root
+
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: auto
+server:
+  port: 8085
+
+
