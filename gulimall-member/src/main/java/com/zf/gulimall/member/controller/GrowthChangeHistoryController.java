@@ -3,12 +3,9 @@ package com.zf.gulimall.member.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.zf.gulimall.member.remotequest.CouponRmiService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.zf.gulimall.member.entity.GrowthChangeHistoryEntity;
 import com.zf.gulimall.member.service.GrowthChangeHistoryService;
@@ -27,6 +24,10 @@ import com.zf.common.utils.R;
 @RestController
 @RequestMapping("member/growthchangehistory")
 public class GrowthChangeHistoryController {
+
+    @Autowired
+    private CouponRmiService couponRmiService;
+
     @Autowired
     private GrowthChangeHistoryService growthChangeHistoryService;
 
@@ -86,4 +87,8 @@ public class GrowthChangeHistoryController {
         return R.ok();
     }
 
+    @GetMapping("/test")
+    public R test(){
+        return R.ok().put("请求成功",couponRmiService.memberCoupons());
+    }
 }
