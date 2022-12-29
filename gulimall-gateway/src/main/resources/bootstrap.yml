@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      config:
+        server-addr: 101.43.0.164:8848
+        file-extension: yaml
+        namespace: mall_zf
+        ext-config:
+          - data-id: gateway.yml
+            group: DEFAULT_GROUP

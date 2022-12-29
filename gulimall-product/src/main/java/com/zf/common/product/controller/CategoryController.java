@@ -1,14 +1,11 @@
 package com.zf.common.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.zf.common.product.entity.CategoryEntity;
 import com.zf.common.product.service.CategoryService;
@@ -41,6 +38,11 @@ public class CategoryController {
         return R.ok().put("page", page);
     }
 
+    @GetMapping("/list/tree")
+    public R listTree(){
+        List<CategoryEntity> entities = categoryService.listWithTree();
+        return R.ok().put("data", entities);
+    }
 
     /**
      * 信息
@@ -76,14 +78,27 @@ public class CategoryController {
     }
 
     /**
+     * 批量修改
+     */
+    @RequestMapping("/update/sort")
+    // @RequiresPermissions("product:category:update")
+    public R updateSort(@RequestBody CategoryEntity[] category){
+        categoryService.updateBatchById(Arrays.asList(category));
+        return R.ok();
+    }
+
+    /**
      * 删除
      */
     @RequestMapping("/delete")
     // @RequiresPermissions("product:category:delete")
     public R delete(@RequestBody Long[] catIds){
-		categoryService.removeByIds(Arrays.asList(catIds));
-
-        return R.ok();
+        int success = categoryService.removeMenuByIds(Arrays.asList(catIds));
+        if (success >0 ){
+            return R.ok();
+        }else {
+            return R.error().put("msg","修改失败!");
+        }
     }
 
 }

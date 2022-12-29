@@ -16,7 +16,7 @@
       </el-form-item>
       <el-form-item label="品牌logo地址" prop="logo">
         <!-- <el-input v-model="dataForm.logo" placeholder="品牌logo地址"></el-input> -->
-        <single-upload v-model="dataForm.logo"></single-upload>
+        <single-upload v-model="dataForm.logo" @pushUrl="getUrl"></single-upload>
       </el-form-item>
       <el-form-item label="介绍" prop="descript">
         <el-input v-model="dataForm.descript" placeholder="介绍"></el-input>
@@ -107,6 +107,9 @@ export default {
     };
   },
   methods: {
+    getUrl (val) {
+      this.dataForm.logo = val
+    },
     init(id) {
       this.dataForm.brandId = id || 0;
       this.visible = true;

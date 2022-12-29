@@ -8,5 +8,5 @@ import org.springframework.web.bind.annotation.GetMapping;
 public interface CouponRmiService {
 
     @GetMapping("/coupon/coupon/member/list")
-    public R memberCoupons();
+    R memberCoupons();
 }
