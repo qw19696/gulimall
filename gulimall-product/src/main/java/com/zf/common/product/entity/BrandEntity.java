@@ -7,6 +7,10 @@ import java.io.Serializable;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+
 /**
  * 品牌
  * 
@@ -24,13 +28,16 @@ public class BrandEntity implements Serializable {
 	 */
 	@TableId
 	private Long brandId;
+
 	/**
 	 * 品牌名
 	 */
+	@NotBlank(message = "品牌名称不能为空！")
 	private String name;
 	/**
 	 * 品牌logo地址
 	 */
+	@NotBlank(message = "logo地址不能为空！")
 	private String logo;
 	/**
 	 * 介绍
@@ -39,10 +46,12 @@ public class BrandEntity implements Serializable {
 	/**
 	 * 显示状态[0-不显示；1-显示]
 	 */
+	@NotNull(message = "显示状态不能为空!")
 	private Integer showStatus;
 	/**
 	 * 检索首字母
 	 */
+	@Pattern(regexp = "/^[a-zA-Z]$/", message = "首字母必须是一个字母!")
 	private String firstLetter;
 	/**
 	 * 排序

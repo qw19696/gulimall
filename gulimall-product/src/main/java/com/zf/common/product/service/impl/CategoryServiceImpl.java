@@ -1,11 +1,12 @@
 package com.zf.common.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.zf.common.product.service.CategoryBrandRelationService;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -24,6 +25,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Autowired
     private CategoryDao categoryDao;
+    @Autowired
+    private CategoryBrandRelationService categoryBrandRelationService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -37,24 +40,29 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Override
     public List<CategoryEntity> listWithTree() {
-        try{
+        try {
             QueryWrapper<CategoryEntity> wrapper = new QueryWrapper<>();
-            wrapper.eq("show_status",1);
+            wrapper.eq("show_status", 1);
             List<CategoryEntity> entities = categoryDao.selectList(wrapper);
             List<CategoryEntity> tree = entities.stream()
                     .filter(category -> category.getCatLevel().equals(1))
-                    .map(category -> {category.setChildren(getChildren(category,entities)); return category;})
-                    .sorted((category1,category2) -> {return (category1.getSort()==null?0:category1.getSort()) - (category2.getSort()==null?0:category2.getSort());})
+                    .map(category -> {
+                        category.setChildren(getChildren(category, entities));
+                        return category;
+                    })
+                    .sorted((category1, category2) -> {
+                        return (category1.getSort() == null ? 0 : category1.getSort()) - (category2.getSort() == null ? 0 : category2.getSort());
+                    })
                     .collect(Collectors.toList());
 //        List<Long> parentIds = entities.stream().map(CategoryEntity::getParentCid).collect(Collectors.toList());
             return tree;
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
             return null;
         }
     }
 
-    private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all){
+    private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all) {
         List<CategoryEntity> collect = all.stream()
                 .filter(categoryEntity -> {
                     return categoryEntity.getParentCid().equals(root.getCatId());
@@ -70,10 +78,38 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return collect;
     }
 
-   @Override
-   public int removeMenuByIds(List<Long> ids) {
-       UpdateWrapper<CategoryEntity> wrapper = new UpdateWrapper<>();
-       wrapper.set("show_status", 0).in("cat_id",ids);
-       return categoryDao.update(null, wrapper);
-   }
+    @Override
+    public int removeMenuByIds(List<Long> ids) {
+        UpdateWrapper<CategoryEntity> wrapper = new UpdateWrapper<>();
+        wrapper.set("show_status", 0).in("cat_id", ids);
+        return categoryDao.update(null, wrapper);
+    }
+
+    @Override
+    public Long[] getCateLogPath(Long id) {
+        List<Long> paths = new ArrayList<>();
+        List<Long> parentPath = findParentPath(id, paths);
+        Collections.reverse(parentPath);
+        return (Long[]) parentPath.toArray(new Long[parentPath.size()]);
+    }
+
+    private List<Long> findParentPath(Long cateId, List<Long> paths) {
+        //收集当前节点id
+        paths.add(cateId);
+        CategoryEntity cate = categoryDao.selectById(cateId);
+        if (cate.getParentCid() != 0) {
+            findParentPath(cate.getParentCid(), paths);
+        }
+        return paths;
+    }
+    @Override//级联更新关联所有数据
+    public void updateCascade(CategoryEntity category) {
+        categoryDao.updateById(category);
+        if (!StringUtils.isEmpty(category.getName())){
+            int res = categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
+            if (res <=0 ){
+                throw new RuntimeException("分类修改失败！");
+            }
+        }
+    }
 }

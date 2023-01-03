@@ -1,8 +1,10 @@
 package com.zf.common.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +43,17 @@ public class CategoryBrandRelationController {
         return R.ok().put("page", page);
     }
 
+    /**
+     * 列表
+     */
+    @RequestMapping("/catelog/list")
+    // @RequiresPermissions("product:categorybrandrelation:list")
+    public R list(@RequestParam("brandId")Long brandId){
+        QueryWrapper<CategoryBrandRelationEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("brand_id",brandId);
+        List<CategoryBrandRelationEntity> cate = categoryBrandRelationService.list(queryWrapper);
+        return R.ok().put("data", cate);
+    }
 
     /**
      * 信息
@@ -59,9 +72,12 @@ public class CategoryBrandRelationController {
     @RequestMapping("/save")
     // @RequiresPermissions("product:categorybrandrelation:save")
     public R save(@RequestBody CategoryBrandRelationEntity categoryBrandRelation){
-		categoryBrandRelationService.save(categoryBrandRelation);
-
-        return R.ok();
+        int res = categoryBrandRelationService.saveDetail(categoryBrandRelation);
+        if (res != 0){
+            return R.ok();
+        }else {
+            return R.error();
+        }
     }
 
     /**

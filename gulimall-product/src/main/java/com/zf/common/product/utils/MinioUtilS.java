@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,10 +103,13 @@ public class MinioUtilS {
         for (MultipartFile file : multipartFile) {
             String fileName = file.getOriginalFilename();
             String[] split = fileName.split("\\.");
+            LocalDate now = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            String formatDatePath = formatter.format(now);
             if (split.length > 1) {
-                fileName = split[0] + "_" + System.currentTimeMillis() + "." + split[1];
+                fileName = formatDatePath + "/" + split[0] + "_" + System.currentTimeMillis() + "." + split[1];
             } else {
-                fileName = fileName + System.currentTimeMillis();
+                fileName = formatDatePath + "/" + fileName + System.currentTimeMillis();
             }
             InputStream in = null;
             try {
