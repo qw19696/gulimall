@@ -28,12 +28,20 @@ public class AttrController {
     @Autowired
     private AttrService attrService;
 
-
-    @GetMapping("/base/list/{catelogId}")
-    public R baseAttrList(@RequestParam Map<String, Object> params, @PathVariable("catelogId") Long cateLogId){
-        PageUtils page = attrService.queryBaseAttrPage(params, cateLogId);
+    /**
+     * 规格参数或销售属性list
+     * @param params
+     * @param cateLogId
+     * @return
+     */
+    @GetMapping("/{attrType}/list/{catelogId}")
+    public R baseAttrList(@RequestParam Map<String, Object> params,
+                          @PathVariable("catelogId") Long cateLogId,
+                          @PathVariable("attrType") String type){
+        PageUtils page = attrService.queryBaseAttrPage(params, cateLogId, type);
         return R.ok().put("page", page);
     }
+
 
     /**
      * 列表
@@ -73,8 +81,8 @@ public class AttrController {
      */
     @RequestMapping("/update")
     // @RequiresPermissions("product:attr:update")
-    public R update(@RequestBody AttrEntity attr){
-		attrService.updateById(attr);
+    public R update(@RequestBody AttrVo attr){
+		attrService.updateAttr(attr);
 
         return R.ok();
     }

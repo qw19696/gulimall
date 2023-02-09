@@ -4,8 +4,8 @@ spring:
   cloud:
     nacos:
       config:
-        server-addr: 101.43.0.164:8848
-        file-extension: yaml
+        server-addr: centos.guguba.top:10911
+        file-extension: yml
         namespace: mall_zf
         ext-config:
           - data-id: mybatis.yml

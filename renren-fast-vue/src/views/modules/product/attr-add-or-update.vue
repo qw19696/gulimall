@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="!dataForm.id ? '新增' : '修改'"
+    :title="!dataForm.attrId ? '新增' : '修改'"
     :close-on-click-modal="false"
     :visible.sync="visible"
     @closed="dialogClose"
@@ -200,6 +200,7 @@ export default {
   components: { CategoryCascader },
   methods: {
     init(id) {
+      console.log('传递进来的值:'+id)
       this.dataForm.attrId = id || 0;
       this.dataForm.attrType = this.type;
       this.visible = true;
