@@ -1,15 +1,20 @@
 package com.zf.common.product.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.zf.common.product.entity.AttrEntity;
 import com.zf.common.product.entity.vo.AttrGroupRelationVo;
+import com.zf.common.product.entity.vo.AttrVo;
 import com.zf.common.product.service.AttrAttrgroupRelationService;
 import com.zf.common.product.service.AttrService;
 import com.zf.common.product.service.CategoryService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import com.zf.common.product.entity.AttrGroupEntity;
@@ -63,6 +68,27 @@ public class AttrGroupController {
         Long[] cateLogPath = categoryService.getCateLogPath(catelogId);
         attrGroup.setCatelogPath(cateLogPath);
         return R.ok().put("attrGroup", attrGroup);
+    }
+
+    /**
+     * 根据分类Id获取旗下所有属性分组的所有属性
+     * @param cateId
+     * @return
+     */
+    @GetMapping("/{cateLogId}/withattr")
+    public R getAttGroupWithAttrs(@PathVariable("cateLogId")Long cateId){
+        List<AttrEntity> attrs = attrGroupService.getAttrByCateLogId(cateId);
+        List<AttrVo> res = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(attrs)){
+            res = attrs.stream()
+                    .map(attr ->{
+                        AttrVo vo = new AttrVo();
+                        BeanUtils.copyProperties(attr, vo);
+                        return vo;
+                    })
+                    .collect(Collectors.toList());
+        }
+        return R.ok().put("data", res);
     }
 
     /**

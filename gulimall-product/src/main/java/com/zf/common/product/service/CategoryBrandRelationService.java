@@ -1,9 +1,11 @@
 package com.zf.common.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zf.common.product.entity.BrandEntity;
 import com.zf.common.utils.PageUtils;
 import com.zf.common.product.entity.CategoryBrandRelationEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +23,8 @@ public interface CategoryBrandRelationService extends IService<CategoryBrandRela
 
     int updateBrand(Long id, String name);
     int updateCategory(Long id, String name);
+
+    List<BrandEntity> getBrandsByCatId(Long id);
 }
 
 

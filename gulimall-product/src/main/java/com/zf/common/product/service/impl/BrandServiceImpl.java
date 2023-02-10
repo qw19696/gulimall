@@ -15,6 +15,7 @@ import com.zf.common.utils.Query;
 import com.zf.common.product.dao.BrandDao;
 import com.zf.common.product.entity.BrandEntity;
 import com.zf.common.product.service.BrandService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("brandService")
@@ -41,6 +42,7 @@ public class BrandServiceImpl extends ServiceImpl<BrandDao, BrandEntity> impleme
         return new PageUtils(page);
     }
 
+    @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public void updateDetail(BrandEntity brand) {
         brandDao.updateById(brand);

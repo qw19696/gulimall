@@ -3,14 +3,14 @@ package com.zf.common.product.controller;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.zf.common.product.entity.BrandEntity;
+import com.zf.common.product.entity.vo.BrandVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.zf.common.product.entity.CategoryBrandRelationEntity;
 import com.zf.common.product.service.CategoryBrandRelationService;
@@ -53,6 +53,18 @@ public class CategoryBrandRelationController {
         queryWrapper.eq("brand_id",brandId);
         List<CategoryBrandRelationEntity> cate = categoryBrandRelationService.list(queryWrapper);
         return R.ok().put("data", cate);
+    }
+
+    @GetMapping("/brands/list")
+    public R brandList(@RequestParam(value = "catId",required = true)Long id){
+        List<BrandEntity> brands = categoryBrandRelationService.getBrandsByCatId(id);
+        List<BrandVo> res = brands.stream().map(brand -> {
+            BrandVo brandVo = new BrandVo();
+            brandVo.setBrandId(brand.getBrandId());
+            brandVo.setBrandName(brand.getName());
+            return brandVo;
+        }).collect(Collectors.toList());
+        return R.ok().put("data", res);
     }
 
     /**
