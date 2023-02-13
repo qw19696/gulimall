@@ -70,7 +70,15 @@ export default {
           this.dataObj.xxurl = res.data[0];
           this.url = res.data[0];
           this.$emit("pushUrl", this.url);
-        });
+        }).then(()=>{
+          console.log(this.dataObj.xxurl);
+      this.fileList.push({
+        name: file.file.name,
+        // url: this.dataObj.host + "/" + this.dataObj.dir + "/" + file.name； 替换${filename}为真正的文件名
+        url: this.dataObj.xxurl
+      });
+      this.emitInput(this.fileList);
+        })
       };
     },
     emitInput(fileList) {
@@ -78,6 +86,7 @@ export default {
       for (let i = 0; i < fileList.length; i++) {
         value.push(fileList[i].url);
       }
+      debugger
       this.$emit("input", value);
     },
     handleRemove(file, fileList) {
@@ -92,7 +101,7 @@ export default {
       this.fileList.push({
         name: file.name,
         // url: this.dataObj.host + "/" + this.dataObj.dir + "/" + file.name； 替换${filename}为真正的文件名
-        url: this.xxurl
+        url: this.dataObj.xxurl
       });
       this.emitInput(this.fileList);
     },

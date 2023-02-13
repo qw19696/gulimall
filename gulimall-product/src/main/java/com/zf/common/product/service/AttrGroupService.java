@@ -2,6 +2,7 @@ package com.zf.common.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zf.common.product.entity.AttrEntity;
+import com.zf.common.product.entity.vo.AttrGroupWithAttrsVo;
 import com.zf.common.utils.PageUtils;
 import com.zf.common.product.entity.AttrGroupEntity;
 
@@ -26,6 +27,6 @@ public interface AttrGroupService extends IService<AttrGroupEntity> {
      * @param cateId
      * @return
      */
-    List<AttrEntity> getAttrByCateLogId(Long cateId);
+    List<AttrGroupWithAttrsVo> getAttrByCateLogId(Long cateId);
 }
 

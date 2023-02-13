@@ -2,9 +2,11 @@ package com.zf.common.product.service.impl;
 
 import com.zf.common.product.entity.AttrAttrgroupRelationEntity;
 import com.zf.common.product.entity.AttrEntity;
+import com.zf.common.product.entity.vo.AttrGroupWithAttrsVo;
 import com.zf.common.product.service.AttrAttrgroupRelationService;
 import com.zf.common.product.service.AttrService;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -71,25 +74,42 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
     }
 
     @Override
-    public List<AttrEntity> getAttrByCateLogId(Long cateId) {
-        List<AttrGroupEntity> relations = this.list(new QueryWrapper<AttrGroupEntity>().eq("catelog_id", cateId));
+    public List<AttrGroupWithAttrsVo> getAttrByCateLogId(Long cateId) {
+        List<AttrGroupEntity> groups = this.list(new QueryWrapper<AttrGroupEntity>().eq("catelog_id", cateId));//查询到该catelogid下所有的商品分组
+        List<AttrGroupWithAttrsVo> response = new ArrayList<>();
 
-        if (!CollectionUtils.isEmpty(relations)){
-            List<Long> collect = relations.stream()
+        if (!CollectionUtils.isEmpty(groups)){
+            List<Long> collect = groups.stream()//获取所有groupId
                     .map(AttrGroupEntity::getAttrGroupId)
                     .collect(Collectors.toList());
 
-            List<AttrAttrgroupRelationEntity> attrRelations = (List<AttrAttrgroupRelationEntity>) attrAttrgroupRelationService.listByIds(collect);
+            List<AttrAttrgroupRelationEntity> attrRelations = (List<AttrAttrgroupRelationEntity>) attrAttrgroupRelationService.listByIds(collect);//查询到所有分组关联关系
 
             if (!CollectionUtils.isEmpty(attrRelations)){
-                List<Long> attrIds = attrRelations.stream()
+                List<Long> attrIds = attrRelations.stream()//获取到所有属性id
                         .map(AttrAttrgroupRelationEntity::getAttrId)
                         .collect(Collectors.toList());
 
-                List<AttrEntity> attrs = (List<AttrEntity>) attrService.listByIds(attrIds);
-                return attrs;
+                List<AttrEntity> attrs = (List<AttrEntity>) attrService.listByIds(attrIds);//查询到所有属性
+
+                Map<Long, List<AttrAttrgroupRelationEntity>> group = attrRelations.stream().collect(Collectors.groupingBy(AttrAttrgroupRelationEntity::getAttrGroupId));//将关系类 根据groupId分组
+
+                if (!CollectionUtils.isEmpty(attrs)){
+                    Map<Long, AttrEntity> attrMap = attrs.stream().collect(Collectors.toMap(AttrEntity::getAttrId, Function.identity()));//将属性list转化为key为attrId的map
+                    Map<Long, AttrGroupEntity> groupMap = groups.stream().collect(Collectors.toMap(AttrGroupEntity::getAttrGroupId, Function.identity()));//将属性分组list转化为key为groupId的map
+                    response = attrRelations.stream().map(item -> {
+                        AttrGroupWithAttrsVo vo = new AttrGroupWithAttrsVo();
+                        BeanUtils.copyProperties(groupMap.get(item.getAttrGroupId()), vo);
+                        List<AttrEntity> res = group.get(item.getAttrGroupId()).stream().map(relation -> {
+                            return attrMap.get(relation.getAttrId());
+                        }).collect(Collectors.toList());
+                        vo.setAttrs(res);
+                        return vo;
+                    }).collect(Collectors.toList());
+                }
+                return response;
             }
         }
-        return new ArrayList<>();
+        return response;
     }
 }

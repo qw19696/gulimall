@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.zf.common.product.entity.AttrEntity;
 import com.zf.common.product.entity.vo.AttrGroupRelationVo;
+import com.zf.common.product.entity.vo.AttrGroupWithAttrsVo;
 import com.zf.common.product.entity.vo.AttrVo;
 import com.zf.common.product.service.AttrAttrgroupRelationService;
 import com.zf.common.product.service.AttrService;
@@ -77,18 +78,8 @@ public class AttrGroupController {
      */
     @GetMapping("/{cateLogId}/withattr")
     public R getAttGroupWithAttrs(@PathVariable("cateLogId")Long cateId){
-        List<AttrEntity> attrs = attrGroupService.getAttrByCateLogId(cateId);
-        List<AttrVo> res = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(attrs)){
-            res = attrs.stream()
-                    .map(attr ->{
-                        AttrVo vo = new AttrVo();
-                        BeanUtils.copyProperties(attr, vo);
-                        return vo;
-                    })
-                    .collect(Collectors.toList());
-        }
-        return R.ok().put("data", res);
+        List<AttrGroupWithAttrsVo> attrs = attrGroupService.getAttrByCateLogId(cateId);
+        return R.ok().put("data", attrs);
     }
 
     /**
