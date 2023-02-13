@@ -5,10 +5,7 @@ import com.zf.common.product.utils.ImageUtil;
 import com.zf.common.product.utils.MinioUtilS;
 import com.zf.common.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -20,7 +17,7 @@ public class MinioController {
     @Autowired
     private MinioUtilS minioUtilS;
 
-    @GetMapping("/policy")
+    @PostMapping("/policy")
     public R uploadToOss(@RequestBody UploadRequest req){
         try {
             MultipartFile[] file = new MultipartFile[]{ImageUtil.getMultipartFile(req.getImageUrl())};
