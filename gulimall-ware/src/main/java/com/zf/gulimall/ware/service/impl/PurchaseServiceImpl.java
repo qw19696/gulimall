@@ -26,4 +26,17 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
         return new PageUtils(page);
     }
 
+    @Override
+    public PageUtils queryPageUnreceive(Map<String, Object> params) {
+        QueryWrapper<PurchaseEntity> query = new QueryWrapper<>();
+//        query.
+
+        IPage<PurchaseEntity> page = this.page(
+                new Query<PurchaseEntity>().getPage(params),
+                new QueryWrapper<PurchaseEntity>()
+        );
+
+        return new PageUtils(page);
+    }
+
 }

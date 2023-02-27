@@ -69,46 +69,53 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
             return new PageUtils(page);
 
         }
-
-
     }
 
     @Override
     public List<AttrGroupWithAttrsVo> getAttrByCateLogId(Long cateId) {
-        List<AttrGroupEntity> groups = this.list(new QueryWrapper<AttrGroupEntity>().eq("catelog_id", cateId));//查询到该catelogid下所有的商品分组
+        //查询到该catelogid下所有的商品分组
+        List<AttrGroupEntity> groups = this.list(new QueryWrapper<AttrGroupEntity>().eq("catelog_id", cateId));
         List<AttrGroupWithAttrsVo> response = new ArrayList<>();
 
-        if (!CollectionUtils.isEmpty(groups)){
-            List<Long> collect = groups.stream()//获取所有groupId
-                    .map(AttrGroupEntity::getAttrGroupId)
-                    .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(groups)) {
+            return response;
+        }
+        //获取所有groupId
+        List<Long> collect = groups.stream()
+                .map(AttrGroupEntity::getAttrGroupId)
+                .collect(Collectors.toList());
 
-            List<AttrAttrgroupRelationEntity> attrRelations = (List<AttrAttrgroupRelationEntity>) attrAttrgroupRelationService.listByIds(collect);//查询到所有分组关联关系
+        //查询到所有分组关联关系
+        List<AttrAttrgroupRelationEntity> attrRelations = attrAttrgroupRelationService.list(new QueryWrapper<AttrAttrgroupRelationEntity>().in("attr_group_id", collect));
 
-            if (!CollectionUtils.isEmpty(attrRelations)){
-                List<Long> attrIds = attrRelations.stream()//获取到所有属性id
-                        .map(AttrAttrgroupRelationEntity::getAttrId)
-                        .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(attrRelations)) {
+            return response;
+        }
+        //获取到所有属性id
+        List<Long> attrIds = attrRelations.stream()
+                .map(AttrAttrgroupRelationEntity::getAttrId)
+                .collect(Collectors.toList());
 
-                List<AttrEntity> attrs = (List<AttrEntity>) attrService.listByIds(attrIds);//查询到所有属性
+        //查询到所有属性
+        List<AttrEntity> attrs = (List<AttrEntity>) attrService.listByIds(attrIds);
 
-                Map<Long, List<AttrAttrgroupRelationEntity>> group = attrRelations.stream().collect(Collectors.groupingBy(AttrAttrgroupRelationEntity::getAttrGroupId));//将关系类 根据groupId分组
+        //将关系类 根据groupId分组
+        Map<Long, List<AttrAttrgroupRelationEntity>> group = attrRelations.stream().collect(Collectors.groupingBy(AttrAttrgroupRelationEntity::getAttrGroupId));
 
-                if (!CollectionUtils.isEmpty(attrs)){
-                    Map<Long, AttrEntity> attrMap = attrs.stream().collect(Collectors.toMap(AttrEntity::getAttrId, Function.identity()));//将属性list转化为key为attrId的map
-                    Map<Long, AttrGroupEntity> groupMap = groups.stream().collect(Collectors.toMap(AttrGroupEntity::getAttrGroupId, Function.identity()));//将属性分组list转化为key为groupId的map
-                    response = attrRelations.stream().map(item -> {
-                        AttrGroupWithAttrsVo vo = new AttrGroupWithAttrsVo();
-                        BeanUtils.copyProperties(groupMap.get(item.getAttrGroupId()), vo);
-                        List<AttrEntity> res = group.get(item.getAttrGroupId()).stream().map(relation -> {
-                            return attrMap.get(relation.getAttrId());
-                        }).collect(Collectors.toList());
-                        vo.setAttrs(res);
-                        return vo;
-                    }).collect(Collectors.toList());
-                }
-                return response;
-            }
+        if (!CollectionUtils.isEmpty(attrs)) {
+            //将属性list转化为key为attrId的map
+            Map<Long, AttrEntity> attrMap = attrs.stream().collect(Collectors.toMap(AttrEntity::getAttrId, Function.identity()));
+            //将属性分组list转化为key为groupId的map
+            Map<Long, AttrGroupEntity> groupMap = groups.stream().collect(Collectors.toMap(AttrGroupEntity::getAttrGroupId, Function.identity()));
+
+            group.forEach((groupId, relations) -> {
+                AttrGroupWithAttrsVo vo = new AttrGroupWithAttrsVo();
+                BeanUtils.copyProperties(groupMap.get(groupId), vo);
+                List<Long> attrId = relations.stream().map(AttrAttrgroupRelationEntity::getAttrId).collect(Collectors.toList());
+                List<AttrEntity> res = attrId.stream().map(attrMap::get).collect(Collectors.toList());
+                vo.setAttrs(res);
+                response.add(vo);
+            });
         }
         return response;
     }

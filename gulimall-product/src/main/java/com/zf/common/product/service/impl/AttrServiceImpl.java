@@ -97,7 +97,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         List<AttrEntity> records = page.getRecords();
         List<Long> attrIds = records.stream().map(AttrEntity::getAttrId).collect(Collectors.toList());
         List<Long> catelogIds = records.stream().map(AttrEntity::getCatelogId).collect(Collectors.toList());
-        List<AttrAttrgroupRelationEntity> attrAttrgroupRelationEntities = relationDao.selectBatchIds(attrIds);
+        List<AttrAttrgroupRelationEntity> attrAttrgroupRelationEntities = relationDao.selectList(new QueryWrapper<AttrAttrgroupRelationEntity>().in("attr_id",attrIds));
         List<Long> attrGroupIds = attrAttrgroupRelationEntities.stream().map(AttrAttrgroupRelationEntity::getAttrGroupId).collect(Collectors.toList());
         List<AttrGroupEntity> attrGroupEntities = new ArrayList<>();
 
@@ -175,7 +175,15 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             AttrAttrgroupRelationEntity relationEntity = new AttrAttrgroupRelationEntity();
             relationEntity.setAttrGroupId(attr.getAttrGroupId());
             relationEntity.setAttrId(attr.getAttrId());
-            int res = relationDao.update(relationEntity, new UpdateWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attr.getAttrId()));
+            int res = 0;
+
+            AttrAttrgroupRelationEntity exist = relationDao.selectOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attr.getAttrId()).eq("attr_group_id", attr.getAttrGroupId()));
+            if (exist != null){
+                res = relationDao.update(relationEntity, new UpdateWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attr.getAttrId()));
+            }else {
+                res = relationDao.insert(relationEntity);
+            }
+
             if (res <= 0) {
                 throw new RuntimeException("规格参数关联关系修改失败！");
             }

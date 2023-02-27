@@ -1,11 +1,16 @@
 package com.zf.common.product.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.math.BigDecimal;
 import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
 
+import com.zf.common.product.entity.vo.spu.Attr;
+import com.zf.common.product.entity.vo.spu.Images;
 import lombok.Data;
 
 /**
@@ -65,5 +70,21 @@ public class SkuInfoEntity implements Serializable {
 	 * 销量
 	 */
 	private Long saleCount;
+	/**
+	 * 图片集合
+	 */
+	@TableField(exist = false)
+	private List<Images> images;
+
+	/**
+	 * Attr集合
+	 */
+	@TableField(exist = false)
+	private List<Attr> attr;
+	/**
+	 * 临时数据收集
+	 */
+	@TableField(exist = false)
+	private Map<String,Object> tmp;
 
 }

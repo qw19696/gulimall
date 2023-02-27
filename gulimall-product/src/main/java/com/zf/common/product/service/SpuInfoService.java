@@ -1,6 +1,7 @@
 package com.zf.common.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zf.common.product.entity.vo.spu.SpuSaveVo;
 import com.zf.common.utils.PageUtils;
 import com.zf.common.product.entity.SpuInfoEntity;
 
@@ -16,5 +17,13 @@ import java.util.Map;
 public interface SpuInfoService extends IService<SpuInfoEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    /**
+     * 添加spu信息
+     * @param vo
+     */
+    void saveSpuInfo(SpuSaveVo vo);
+
+    PageUtils queryPageByConditon(Map<String, Object> params);
 }
 
