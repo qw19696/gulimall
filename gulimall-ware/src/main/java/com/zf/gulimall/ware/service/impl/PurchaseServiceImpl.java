@@ -5,14 +5,13 @@ import com.zf.common.enums.WareConstant;
 import com.zf.gulimall.ware.entity.PurchaseDetailEntity;
 import com.zf.gulimall.ware.entity.vo.MergeVo;
 import com.zf.gulimall.ware.entity.vo.PurchaseDoneVo;
+import com.zf.gulimall.ware.entity.vo.PurchaseItemDoneVo;
 import com.zf.gulimall.ware.service.PurchaseDetailService;
+import com.zf.gulimall.ware.service.WareSkuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -36,6 +35,8 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
 
     @Autowired
     private PurchaseDetailService purchaseDetailService;
+    @Autowired
+    private WareSkuService wareSkuService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -69,7 +70,7 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
         //合并前检查采购需求的状态,不是已分配或新建状态不能合并
         Collection<PurchaseDetailEntity> details = purchaseDetailService.listByIds(items);
         details.forEach(item -> {
-            if (!item.getStatus().equals(WareConstant.PurchaseDetailEnum.ASSIGNED.getCode())||
+            if (!item.getStatus().equals(WareConstant.PurchaseDetailEnum.ASSIGNED.getCode())&&
                 !item.getStatus().equals(WareConstant.PurchaseDetailEnum.CREATED.getCode())){
 
                 throw new RuntimeException("仅能合并已分配或新建状态的采购需求");
@@ -140,7 +141,36 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void done(PurchaseDoneVo vo) {
+        //1.改变采购项状态
+        boolean flag = true;
+        List<PurchaseItemDoneVo> items = vo.getItems();
+        List<PurchaseDetailEntity> updates = new ArrayList<>();
+        for (PurchaseItemDoneVo item : items) {
+            PurchaseDetailEntity detailEntity =new PurchaseDetailEntity();
+            if(item.getStatus() == WareConstant.PurchaseDetailEnum.HASERROR.getCode()){
+                flag = false;
+                detailEntity.setStatus(item.getStatus());
+            }else {
+                //.成功采购的进行入库
+                detailEntity.setStatus(WareConstant.PurchaseDetailEnum.FINISH.getCode());
+                PurchaseDetailEntity detail = purchaseDetailService.getById(item.getId());
+                wareSkuService.addStock(detail.getSkuId(),detail.getWareId(),detail.getSkuNum());
+            }
+            detailEntity.setId(item.getId());
+            updates.add(detailEntity);
+        }
+
+        purchaseDetailService.updateBatchById(updates);
+
+        //2.改变采购单状态
+        Long purchaseId = vo.getId();
+        PurchaseEntity purchase = new PurchaseEntity();
+        purchase.setId(purchaseId);
+        purchase.setStatus(flag? WareConstant.PurchaseEnum.FINISH.getCode():WareConstant.PurchaseEnum.HASERROR.getCode());
+        updateById(purchase);
+
 
     }
 

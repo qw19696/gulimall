@@ -1,10 +1,13 @@
 package com.zf.common.product.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import com.zf.common.product.entity.ProductAttrValueEntity;
 import com.zf.common.product.entity.vo.AttrResponseVo;
 import com.zf.common.product.entity.vo.AttrVo;
+import com.zf.common.product.service.ProductAttrValueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +30,8 @@ import com.zf.common.utils.R;
 public class AttrController {
     @Autowired
     private AttrService attrService;
+    @Autowired
+    private ProductAttrValueService productAttrValueService;
 
     /**
      * 规格参数或销售属性list
@@ -79,10 +84,11 @@ public class AttrController {
     /**
      * 修改
      */
-    @RequestMapping("/update")
+    @RequestMapping("/update/{spuId}")
     // @RequiresPermissions("product:attr:update")
-    public R update(@RequestBody AttrVo attr){
-		attrService.updateAttr(attr);
+    public R updateSpuAttr(@PathVariable("spuId")Long spuId,
+                           @RequestBody List<ProductAttrValueEntity> entitys){
+		productAttrValueService.updateSpuAttr(spuId, entitys);
 
         return R.ok();
     }
@@ -96,6 +102,12 @@ public class AttrController {
 		attrService.removeByIds(Arrays.asList(attrIds));
 
         return R.ok();
+    }
+
+    @GetMapping("/base/listforspu/{spuId}")
+    public R baseAttrList(@PathVariable("spuId")Long spuId){
+        List<ProductAttrValueEntity> entityList =  productAttrValueService.baseAttrListForSpu(spuId);
+        return R.ok().put("data", entityList);
     }
 
 }
