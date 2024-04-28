@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: coupon
+  cloud:
+    nacos:
+      config:
+        server-addr: centos.guguba.top:10911
+        file-extension: yml
+        namespace: mall_zf
+        ext-config:
+          - data-id: mybatis.yml
+            group: DEFAULT_GROUP
+          - data-id: coupon.yml
+            group: DEFAULT_GROUP

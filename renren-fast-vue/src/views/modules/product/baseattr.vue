@@ -203,6 +203,7 @@ export default {
     },
     // 新增 / 修改
     addOrUpdateHandle(id) {
+      console.log('发起组件传值：'+id)
       this.addOrUpdateVisible = true;
       this.$nextTick(() => {
         this.$refs.addOrUpdate.init(id);

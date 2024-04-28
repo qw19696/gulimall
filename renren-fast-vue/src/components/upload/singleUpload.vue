@@ -1,14 +1,11 @@
 <template> 
   <div>
     <el-upload
-      action="http://gulimall-yaoxinjia.oss-cn-shenzhen.aliyuncs.com"
-      :data="dataObj"
+      action=""
       list-type="picture"
       :multiple="false" :show-file-list="showFileList"
       :file-list="fileList"
-      :before-upload="beforeUpload"
-      :on-remove="handleRemove"
-      :on-success="handleUploadSuccess"
+      :http-request="uploadFile"
       :on-preview="handlePreview">
       <el-button size="small" type="primary">点击上传</el-button>
       <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过10MB</div>
@@ -19,7 +16,7 @@
   </div>
 </template>
 <script>
-   import {policy} from './policy'
+   import {policy,policy2} from './policy'
    import { getUUID } from '@/utils'
 
   export default {
@@ -54,16 +51,8 @@
     },
     data() {
       return {
-        dataObj: {
-          policy: '',
-          signature: '',
-          key: '',
-          ossaccessKeyId: '',
-          dir: '',
-          host: '',
-          // callback:'',
-        },
-        dialogVisible: false
+        url: '',
+        dialogVisible: false,
       };
     },
     methods: {
@@ -76,21 +65,20 @@
       handlePreview(file) {
         this.dialogVisible = true;
       },
-      beforeUpload(file) {
-        let _self = this;
-        return new Promise((resolve, reject) => {
-          policy().then(response => {
-            _self.dataObj.policy = response.data.policy;
-            _self.dataObj.signature = response.data.signature;
-            _self.dataObj.ossaccessKeyId = response.data.accessid;
-            _self.dataObj.key = response.data.dir +getUUID()+'_${filename}';
-            _self.dataObj.dir = response.data.dir;
-            _self.dataObj.host = response.data.host;
-            resolve(true)
-          }).catch(err => {
-            reject(false)
-          })
-        })
+      uploadFile (file) {
+            let reader = new FileReader(); //本地预览
+            reader.readAsDataURL(file.file);
+            reader.onloadend = () =>{
+              const imgbase64 = reader.result;
+              policy2({'imageUrl': imgbase64}).then(res=>{
+                console.log(res.data[0]);
+                 this.url = res.data[0]
+                 this.$emit('pushUrl', this.url)
+              })
+             
+            };
+
+
       },
       handleUploadSuccess(res, file) {
         console.log("上传成功...")

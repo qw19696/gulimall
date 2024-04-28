@@ -1,14 +1,12 @@
 package com.zf.gulimall.coupon.controller;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.*;
 
 import com.zf.gulimall.coupon.entity.CouponEntity;
 import com.zf.gulimall.coupon.service.CouponService;
@@ -29,6 +27,24 @@ import com.zf.common.utils.R;
 public class CouponController {
     @Autowired
     private CouponService couponService;
+
+    @Value("${user.name}")
+    private String name;
+
+    @Value("${user.age}")
+    private Integer age;
+
+    @GetMapping("/member/list")
+    public R memberCoupons(){
+        CouponEntity coupon = new CouponEntity();
+        coupon.setCouponName("打骨折2");
+        return R.ok().put("coupons", Collections.singletonList(coupon));
+    }
+
+    @GetMapping("/test")
+    public R test(){
+        return R.ok().put("test",new Object[]{name,age});
+    }
 
     /**
      * 列表

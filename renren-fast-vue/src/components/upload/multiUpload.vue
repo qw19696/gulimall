@@ -1,7 +1,126 @@
 <template>
   <div>
     <el-upload
-      action="http://gulimall-yaoxinjia.oss-cn-shenzhen.aliyuncs.com"
+      action=""
+      :data="dataObj"
+      list-type="picture-card"
+      :file-list="fileList"
+      :on-remove="handleRemove"
+      :on-success="handleUploadSuccess"
+      :on-preview="handlePreview"
+      :http-request="uploadFile"
+      :limit="maxCount"
+      :on-exceed="handleExceed"
+    >
+      <i class="el-icon-plus"></i>
+    </el-upload>
+    <el-dialog :visible.sync="dialogVisible">
+      <img width="100%" :src="dialogImageUrl" alt />
+    </el-dialog>
+  </div>
+</template>
+<script>
+import { policy } from "./policy";
+import { getUUID } from "@/utils";
+export default {
+  name: "multiUpload",
+  props: {
+    //图片属性数组
+    value: Array,
+    //最大上传图片数量
+    maxCount: {
+      type: Number,
+      default: 30,
+    },
+  },
+  data() {
+    return {
+      dataObj: {
+        policy: "",
+        signature: "",
+        key: "",
+        ossaccessKeyId: "",
+        dir: "",
+        host: "",
+        uuid: "",
+        xxurl: ""
+      },
+      dialogVisible: false,
+      dialogImageUrl: null,
+    };
+  },
+  computed: {
+    fileList() {
+      let fileList = [];
+      for (let i = 0; i < this.value.length; i++) {
+        fileList.push({ url: this.value[i] });
+      }
+
+      return fileList;
+    },
+  },
+  mounted() {},
+  methods: {
+    uploadFile(file) {
+      let reader = new FileReader(); //本地预览
+      reader.readAsDataURL(file.file);
+      reader.onloadend = () => {
+        const imgbase64 = reader.result;
+        policy({ 'imageUrl': imgbase64 }).then((res) => {
+          this.dataObj.xxurl = res.data[0];
+          this.url = res.data[0];
+          this.$emit("pushUrl", this.url);
+        }).then(()=>{
+          console.log(this.dataObj.xxurl);
+      this.fileList.push({
+        name: file.file.name,
+        // url: this.dataObj.host + "/" + this.dataObj.dir + "/" + file.name； 替换${filename}为真正的文件名
+        url: this.dataObj.xxurl
+      });
+      this.emitInput(this.fileList);
+        })
+      };
+    },
+    emitInput(fileList) {
+      let value = [];
+      for (let i = 0; i < fileList.length; i++) {
+        value.push(fileList[i].url);
+      }
+      debugger
+      this.$emit("input", value);
+    },
+    handleRemove(file, fileList) {
+      this.emitInput(fileList);
+    },
+    handlePreview(file) {
+      this.dialogVisible = true;
+      this.dialogImageUrl = file.url;
+    },
+    handleUploadSuccess(res, file) {
+      console.log(this.dataObj.xxurl);
+      this.fileList.push({
+        name: file.name,
+        // url: this.dataObj.host + "/" + this.dataObj.dir + "/" + file.name； 替换${filename}为真正的文件名
+        url: this.dataObj.xxurl
+      });
+      this.emitInput(this.fileList);
+    },
+    handleExceed(files, fileList) {
+      this.$message({
+        message: "最多只能上传" + this.maxCount + "张图片",
+        type: "warning",
+        duration: 1000,
+      });
+    },
+  },
+};
+</script>
+<style></style>
+
+<!-- <template>
+  <div>
+    <el-upload
+      action=""
       :data="dataObj"
       list-type="picture-card"
       :file-list="fileList"
@@ -75,6 +194,7 @@ export default {
       this.dialogImageUrl = file.url;
     },
     beforeUpload(file) {
+      console.log(file);
       let _self = this;
       return new Promise((resolve, reject) => {
         policy()
@@ -115,4 +235,4 @@ export default {
 <style>
 </style>
 
-
+ -->

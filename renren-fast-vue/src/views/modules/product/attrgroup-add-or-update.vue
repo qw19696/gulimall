@@ -29,6 +29,7 @@
         <!-- <el-cascader filterable placeholder="试试搜索：手机" v-model="catelogPath" :options="categorys"  :props="props"></el-cascader> -->
         <!-- :catelogPath="catelogPath"自定义绑定的属性，可以给子组件传值 -->
         <category-cascader :catelogPath.sync="catelogPath"></category-cascader>
+        <!-- <el-cascader :options="categorys" v-model="dataForm.catelogId"></el-cascader> -->
       </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">

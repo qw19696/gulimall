@@ -13,5 +13,10 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface SpuInfoDao extends BaseMapper<SpuInfoEntity> {
-	
+
+    /**
+     * 添加spu基本信息
+     * @param spuInfo
+     */
+    void saveBaseSpuInfo(SpuInfoEntity spuInfo);
 }

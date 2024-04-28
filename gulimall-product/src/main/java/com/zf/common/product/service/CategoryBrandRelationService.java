@@ -1,9 +1,11 @@
 package com.zf.common.product.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.zf.common.product.entity.BrandEntity;
 import com.zf.common.utils.PageUtils;
 import com.zf.common.product.entity.CategoryBrandRelationEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +18,13 @@ import java.util.Map;
 public interface CategoryBrandRelationService extends IService<CategoryBrandRelationEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    int saveDetail(CategoryBrandRelationEntity categoryBrandRelation);
+
+    int updateBrand(Long id, String name);
+    int updateCategory(Long id, String name);
+
+    List<BrandEntity> getBrandsByCatId(Long id);
 }
+
 

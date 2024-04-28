@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: member
+  cloud:
+    nacos:
+      config:
+        server-addr: centos.guguba.top:10911
+        file-extension: yaml
+        namespace: mall_zf
+        ext-config:
+          - data-id: mybatis.yml
+            group: DEFAULT_GROUP
+          - data-id: member.yml
+            group: DEFAULT_GROUP
